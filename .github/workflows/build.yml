@@ -1,9 +1,9 @@
-name: Build C App & Modern Setup.exe
+name: Build Winlator Shell & Setup.exe
 
 on:
   push:
-    branches: [ "main" ]
-  workflow_dispatch: # Allows you to click "Run workflow" manually on GitHub
+    branches: [ "main", "master" ]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -13,24 +13,24 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up MinGW-w64 (C Compiler)
+      - name: Set up MinGW-w64 C Compiler
         uses: egor-tensin/setup-mingw@v2
         with:
           platform: x64
 
-      - name: Compile C Application
+      - name: Compile C Application (main.c + config.h)
         shell: cmd
         run: |
-          mkdir build
-          gcc src/main.c -o build/WinlatorShell.exe -mwindows -lgdi32 -lgdiplus -luser32 -lshell32 -lcomctl32 -ldwmapi -luxtheme -O2
+          if not exist build mkdir build
+          gcc src/main.c -o build/WinlatorShell.exe -mwindows -lgdi32 -luser32 -lshell32 -lcomctl32 -lcomdlg32 -ladvapi32 -O2
 
-      - name: Compile Setup.exe with Inno Setup
+      - name: Build Modern Setup.exe with Inno Setup
         shell: cmd
         run: |
           "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
 
-      - name: Upload Setup.exe to GitHub Artifacts
+      - name: Upload WinlatorShell_Setup.exe Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: WinlatorShell-Installer
+          name: WinlatorShell-Setup
           path: Output/WinlatorShell_Setup.exe
